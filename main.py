@@ -13,11 +13,9 @@ metadata.create_all(engine)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("before run")
     await database.connect()
     yield
     await database.disconnect()
-    print("after run")
 
 app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
@@ -26,19 +24,22 @@ templates = Jinja2Templates(directory="templates")
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
-    query = user.insert().values(
-        email="test@test.com",
-        name="test",
-        password="aadflkjadf",
-        created_at=datetime.now()
-    )
-    last_record_id = await database.execute(query)
+    # query = user.insert().values(
+    #     email="test@test.com",
+    #     name="test",
+    #     password="aadflkjadf",
+    #     created_at=datetime.now()
+    # )
+    # last_record_id = await database.execute(query)
     return templates.TemplateResponse(
         request=request,
         name="home.html",
-        context={"id": last_record_id}
+        context={"id": 1}
     )
 
+@app.get("/auth", response_class=HTMLResponse)
+async def auth_page(request: Request):
+    return templates.TemplateResponse(request=request, name="auth.html")
 
 @app.post("/clicked", response_class=HTMLResponse)
 async def clicked(request: Request):
