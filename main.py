@@ -4,28 +4,25 @@ from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
+from contextlib import asynccontextmanager
 from db import metadata, engine, database, user
 
 
 metadata.create_all(engine)
 
 
-app = FastAPI()
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    print("before run")
+    await database.connect()
+    yield
+    await database.disconnect()
+    print("after run")
 
+app = FastAPI(lifespan=lifespan)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 templates = Jinja2Templates(directory="templates")
-
-
-@app.on_event("startup")
-async def startup():
-    await database.connect()
-
-
-@app.on_event("shutdown")
-async def shutdown():
-    await database.disconnect()
-
 
 @app.get("/", response_class=HTMLResponse)
 async def home(request: Request):
