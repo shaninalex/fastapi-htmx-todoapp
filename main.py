@@ -1,6 +1,7 @@
 from datetime import datetime
-from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse
+from typing import Annotated
+from fastapi import FastAPI, Request, Form
+from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 
@@ -40,6 +41,12 @@ async def home(request: Request):
 @app.get("/auth", response_class=HTMLResponse)
 async def auth_page(request: Request):
     return templates.TemplateResponse(request=request, name="auth.html")
+
+@app.post("/auth")
+async def auth_handler(email: Annotated[str, Form()], password: Annotated[str, Form()]):
+    print(email)
+    print(password)
+    return {"email": email, "password": password}
 
 @app.post("/clicked", response_class=HTMLResponse)
 async def clicked(request: Request):
