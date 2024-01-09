@@ -1,5 +1,7 @@
-<form class="card mx-auto" hx-post="/auth" hx-target="#auth-response" style="max-width: 300px">
+<form class="card mx-auto" hx-post="{% if register %}/register{% else %}/auth{% endif %}" hx-target="#auth-response"
+    style="max-width: 300px">
     <div class="card-body">
+        <h5>{{title}}</h5>
         <div class="mb-3">
             <input type="email" placeholder="email" required name="email" class="form-control" />
         </div>
@@ -9,4 +11,13 @@
         <div class="mb-3" id="auth-response"></div>
         <button type="submit" class="btn btn-outline-info">Submit</button>
     </div>
+    {% if not register %}
+    <div class="card-footer">
+        <a href="/register">Register</a>
+    </div>
+    {% else %}
+    <div class="card-footer">
+        <a href="/auth">Login</a>
+    </div>
+    {% endif %}
 </form>

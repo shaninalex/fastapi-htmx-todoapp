@@ -1,4 +1,5 @@
 aiosqlite
+argon2-cffi
 databases
 fastapi
 uvicorn[standard]
