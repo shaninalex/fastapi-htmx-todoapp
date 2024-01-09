@@ -1,0 +1,9 @@
+aiosqlite
+databases
+fastapi
+uvicorn[standard]
+PyJWT
+SQLAlchemy
+Jinja2
+black
+python-multipart

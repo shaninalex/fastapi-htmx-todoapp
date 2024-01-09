@@ -23,4 +23,4 @@ jobs:
         WITH_V: true
         MAJOR_STRING_TOKEN: "release:"
         MINOR_STRING_TOKEN: "feat:"
-        PATCH_STRING_TOKEN: "fix:"
+        PATCH_STRING_TOKEN: "patch:"
