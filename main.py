@@ -1,9 +1,9 @@
 from datetime import datetime
 import time
 from typing import Annotated
-from fastapi import Depends, FastAPI, Request, Form, Response, APIRouter
+from fastapi import Depends, FastAPI, Request, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import insert
@@ -57,7 +57,7 @@ async def home(request: Request):
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth_page(request: Request):
-    return templates.TemplateResponse(request=request, name="auth.html")
+    return templates.TemplateResponse(request=request, name="auth.html", context={"title": "Login"})
 
 
 @app.post("/auth")
@@ -86,6 +86,13 @@ async def auth_handler(
             },
         )
 
+
+@app.get("/register", response_class=HTMLResponse)
+async def register_page(request: Request):
+    return templates.TemplateResponse(request=request, name="auth.html", context={
+        "title": "Register",
+        "register": True
+    })
 
 @app.post("/clicked", response_class=HTMLResponse)
 async def clicked(request: Request):
