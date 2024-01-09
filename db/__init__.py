@@ -39,6 +39,4 @@ checkbox = sa.Table(
     sa.Column("completed", sa.Boolean),
 )
 
-engine = sa.create_engine(
-    DATABASE_URL, connect_args={"check_same_thread": False}
-)
+engine = sa.create_engine(DATABASE_URL, connect_args={"check_same_thread": False})

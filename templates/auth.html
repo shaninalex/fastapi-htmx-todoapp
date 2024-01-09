@@ -13,21 +13,8 @@
 
 <body>
     <div class="container pt-5">
-
-        <form class="card mx-auto" hx-post="/auth" hx-target="#auth-response" style="max-width: 300px">
-            <div class="card-body">
-                <div class="mb-3">
-                    <input type="email" placeholder="email" required name="email" class="form-control" />
-                </div>
-                <div class="mb-3">
-                    <input type="password" placeholder="password" required name="password" class="form-control" />
-                </div>
-                <div class="mb-3" id="auth-response"></div>
-                <button type="submit" class="btn btn-outline-info">Submit</button>
-            </div>
-        </form>
+        {% include "components/auth-form.html" %}
     </div>
-
 </body>
 
 </html>

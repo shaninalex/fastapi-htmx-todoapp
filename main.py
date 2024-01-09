@@ -1,14 +1,16 @@
 from datetime import datetime
 import time
 from typing import Annotated
-from fastapi import FastAPI, Request, Form
+from fastapi import Depends, FastAPI, Request, Form, Response, APIRouter
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-
+from sqlalchemy import insert
 from contextlib import asynccontextmanager
+
 from db import metadata, engine, database, user
+from internal.utils import generate_auth_cookie, validate_user
 
 
 metadata.create_all(engine)
@@ -19,6 +21,7 @@ async def lifespan(app: FastAPI):
     await database.connect()
     yield
     await database.disconnect()
+
 
 app = FastAPI(lifespan=lifespan)
 
@@ -31,6 +34,7 @@ app.add_middleware(
 )
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
+
 # Middleware example
 @app.middleware("http")
 async def add_process_time_header(request: Request, call_next):
@@ -40,32 +44,48 @@ async def add_process_time_header(request: Request, call_next):
     response.headers["X-Process-Time"] = str(process_time)
     return response
 
+
 templates = Jinja2Templates(directory="templates")
 
-@app.get("/", response_class=HTMLResponse)
+
+@app.get("/", response_class=HTMLResponse, dependencies=[Depends(validate_user)])
 async def home(request: Request):
-    # query = user.insert().values(
-    #     email="test@test.com",
-    #     name="test",
-    #     password="aadflkjadf",
-    #     created_at=datetime.now()
-    # )
-    # last_record_id = await database.execute(query)
-    return templates.TemplateResponse(
-        request=request,
-        name="home.html",
-        context={"id": 1}
-    )
+    # Redirecting to auth page
+    # return RedirectResponse("/auth")
+    return templates.TemplateResponse(request=request, name="home.html")
+
 
 @app.get("/auth", response_class=HTMLResponse)
 async def auth_page(request: Request):
     return templates.TemplateResponse(request=request, name="auth.html")
 
+
 @app.post("/auth")
-async def auth_handler(email: Annotated[str, Form()], password: Annotated[str, Form()]):
-    print(email)
-    print(password)
-    return {"email": email, "password": password}
+async def auth_handler(
+    request: Request,
+    response: Response,
+    email: Annotated[str, Form()],
+    password: Annotated[str, Form()],
+):
+    try:
+        query = insert(user).values(
+            email=email, name="test", password="aadflkjadf", created_at=datetime.now()
+        )
+        await database.execute(query)
+        token = generate_auth_cookie(email)
+        response.set_cookie("auth", token, secure=True, httponly=True)
+        response.headers["HX-Location"] = "/"
+        return {"status": "ok"}
+    except:
+        return templates.TemplateResponse(
+            request=request,
+            name="components/alert.html",
+            context={
+                "type": "danger",
+                "message": "Unable to register user",
+            },
+        )
+
 
 @app.post("/clicked", response_class=HTMLResponse)
 async def clicked(request: Request):
