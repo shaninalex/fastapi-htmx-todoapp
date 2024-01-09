@@ -1,4 +1,5 @@
 from fastapi import Request, Response, HTTPException
+from sqlalchemy import select
 from argon2 import PasswordHasher
 import datetime
 import jwt
@@ -28,8 +29,7 @@ def validate_user(request: Request, response: Response):
         )
     try:
         payload = jwt.decode(auth_token, "secret", algorithms=["HS256"])
-        query = select([user.c.email]).where(user.c.email == email)
-        print(payload["email"])
+        query = select([user.c.email]).where(user.c.email == payload["email"])
     except Exception as e:
         print(e)
         raise HTTPException(
