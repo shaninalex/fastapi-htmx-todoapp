@@ -1,9 +1,14 @@
 {% extends "base.html" %}
 
+{% block title %}Home{% endblock %}
+
 {% block content %}
-<h1>Home page {{ id }}</h1>
-<a href="/logout">logout</a>
-<button hx-post="/clicked" hx-swap="innerHTML" class="btn">
-    Click Me
-</button>
+
+{% include "components/navbar.html" %}
+
+<div class="container-fluid">
+    <button hx-post="/clicked" hx-swap="innerHTML" class="btn">
+        Click Me
+    </button>
+</div>
 {% endblock %}

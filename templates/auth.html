@@ -1,5 +1,9 @@
 {% extends "base.html" %}
 
+{% block title %}
+{{ title }}
+{% endblock %}
+
 {% block content %}
 <div class="container pt-5">
     {% include "components/auth-form.html" %}
