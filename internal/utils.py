@@ -1,4 +1,4 @@
-from fastapi import Request, Response, HTTPException
+from fastapi import Request, HTTPException
 from sqlalchemy import select
 from argon2 import PasswordHasher
 import datetime
@@ -19,7 +19,7 @@ def generate_auth_cookie(email: str) -> str:
     return auth_token
 
 
-def validate_user(request: Request, response: Response):
+async def validate_user(request: Request):
     auth_token = request.cookies.get("auth")
     if not auth_token:
         raise HTTPException(
@@ -29,7 +29,10 @@ def validate_user(request: Request, response: Response):
         )
     try:
         payload = jwt.decode(auth_token, "secret", algorithms=["HS256"])
-        query = select([user.c.email]).where(user.c.email == payload["email"])
+        query = select(user).where(
+            user.c.email == payload["email"])
+        account = await database.fetch_one(query)
+        yield account
     except Exception as e:
         print(e)
         raise HTTPException(

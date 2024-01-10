@@ -1,8 +1,8 @@
 from datetime import datetime
 import time
 from typing import Annotated, Any
-from fastapi import Depends, FastAPI, Request, Form
-from fastapi.responses import Response, RedirectResponse
+from fastapi import Depends, FastAPI, Request, Form, HTTPException
+from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import insert, select
 from contextlib import asynccontextmanager
 
-from internal.db import metadata, database, engine, user
+from internal.db import metadata, database, engine, user, task
 from internal.utils import (
     generate_auth_cookie,
     generate_password,
@@ -135,6 +135,37 @@ async def register_handler(
             context={
                 "type": "danger",
                 "message": "Unable to register user",
+            },
+        )
+
+
+@app.post("/create-task")
+async def create_task(request: Request,
+                      taskname: Annotated[str, Form()],
+                      account: Annotated[Any, Depends(validate_user)]):
+    try:
+        query = insert(task).values(
+            name=taskname,
+            user_id=account.id
+        )
+        inserted_row_id = await database.execute(query)
+        return templates.TemplateResponse(
+            request=request,
+            name="chunks/task-card.html",
+            status_code=201,
+            context={
+                "id": inserted_row_id,
+                "name": taskname,
+            },
+        )
+    except Exception as err:
+        return templates.TemplateResponse(
+            request=request,
+            name="components/alert.html",
+            status_code=400,
+            context={
+                "type": "danger",
+                "message": err,
             },
         )
 
