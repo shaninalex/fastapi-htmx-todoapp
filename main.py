@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import insert, select
+from sqlalchemy import insert, select, delete
 from contextlib import asynccontextmanager
 
 from internal.db import metadata, database, engine, user, task
@@ -63,7 +63,8 @@ async def home(request: Request,
         request=request,
         name="home.html",
         context={
-            "tasks": tasks
+            "tasks": tasks,
+            "account": account
         })
 
 
@@ -131,8 +132,9 @@ async def register_handler(
         response.set_cookie(
             "auth", generate_auth_cookie(email), secure=True, httponly=True
         )
-        response.headers["HX-Location"] = "/"
-        return {"status": "ok"}
+        response.status_code = 303
+        response.headers["Location"] = "/"
+        return response
     except Exception as e:
         print(e)
         return templates.TemplateResponse(
@@ -179,17 +181,36 @@ async def create_task(request: Request,
 
 
 @app.delete("/task/{id}")
-def delete_task(id: str):
+async def delete_task(id: str,
+                      account: Annotated[Any, Depends(validate_user)]):
+    await database.execute(delete(task).where(
+        task.c.id == id,
+        task.c.user_id == account.id
+    ))
     return None
+
+
+@app.get("/task/{id}/edit")
+async def patch_task(id: str,
+                     request: Request,
+                     account: Annotated[Any, Depends(validate_user)]):
+    query = select(task).where(task.c.id == id, task.c.user_id == account.id)
+    task_item = await database.fetch_one(query)
+    return templates.TemplateResponse(
+        request=request,
+        name="chunks/task-form.html",
+        status_code=200,
+        context={
+            "task": task_item
+        },
+    )
 
 
 @app.get("/logout")
 def logout(response: Response):
-    # Delete the "auth" cookie
     response.delete_cookie(key="auth", path="/", secure=True, httponly=True)
-    # Redirect the user to the home page
     response.headers["Location"] = "/"
-    response.status_code = 302  # 302 Found (temporary redirect)
+    response.status_code = 302
     return response
 
 # @app.post("/clicked", response_class=HTMLResponse)

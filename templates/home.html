@@ -11,10 +11,9 @@
               hx-target-400="#create_task_error"
             class="input-group mb-3">
             <input type="text" class="form-control" placeholder="Enter task name" required name="taskname" />
-            <button class="btn btn-outline-secondary" type="submit" id="button-addon2">Button</button>
+            <button class="btn btn-success" type="submit" id="button-addon2">Button</button>
         </form>
         <div id="create_task_error" class="mb-3"></div>        
-
         <div class="row" id="tasks-list">
             {% for task in tasks %}
             {% include "chunks/task-card.html" %}
