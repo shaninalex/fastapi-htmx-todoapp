@@ -1,15 +1,15 @@
 from datetime import datetime
 import time
-from typing import Annotated
+from typing import Annotated, Any
 from fastapi import Depends, FastAPI, Request, Form, Response
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, RedirectResponse
+from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from sqlalchemy import insert, select
 from contextlib import asynccontextmanager
 
-from internal.db import metadata, engine, database, user
+from internal.db import metadata, database, engine, user
 from internal.utils import (
     generate_auth_cookie,
     generate_password,
@@ -76,7 +76,7 @@ async def auth_handler(
 ):
     try:
         query = select([user.c.password]).where(user.c.email == email)
-        account = await database.fetch_one(query)
+        account: Any = await database.fetch_one(query)
         check_password(password, account.password)
         response.set_cookie(
             "auth", generate_auth_cookie(email), secure=True, httponly=True
@@ -143,14 +143,13 @@ def logout(response: Response):
     response.status_code = 302  # 302 Found (temporary redirect)
     return response
 
-
-@app.post("/clicked", response_class=HTMLResponse)
-async def clicked(request: Request):
-    return templates.TemplateResponse(request=request, name="chunks/result.html")
-
-
-@app.get("/items/{id}", response_class=HTMLResponse)
-async def read_item(request: Request, id: str):
-    return templates.TemplateResponse(
-        request=request, name="item.html", context={"id": id}
-    )
+# @app.post("/clicked", response_class=HTMLResponse)
+# async def clicked(request: Request):
+#     return templates.TemplateResponse(request=request, name="chunks/result.html")
+#
+#
+# @app.get("/items/{id}", response_class=HTMLResponse)
+# async def read_item(request: Request, id: str):
+#     return templates.TemplateResponse(
+#         request=request, name="item.html", context={"id": id}
+#     )
