@@ -146,7 +146,7 @@ def logout(response: Response):
 
 @app.post("/clicked", response_class=HTMLResponse)
 async def clicked(request: Request):
-    return templates.TemplateResponse(request=request, name="result.html")
+    return templates.TemplateResponse(request=request, name="chunks/result.html")
 
 
 @app.get("/items/{id}", response_class=HTMLResponse)
