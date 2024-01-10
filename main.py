@@ -1,7 +1,8 @@
 from datetime import datetime
 import time
 from typing import Annotated, Any
-from fastapi import Depends, FastAPI, Request, Form, Response
+from fastapi import Depends, FastAPI, Request, Form
+from fastapi.responses import Response, RedirectResponse
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
@@ -77,18 +78,22 @@ async def auth_handler(
     try:
         query = select([user.c.password]).where(user.c.email == email)
         account: Any = await database.fetch_one(query)
+        if not account:
+            raise Exception("Invalid credentials")
         check_password(password, account.password)
         response.set_cookie(
             "auth", generate_auth_cookie(email), secure=True, httponly=True
         )
-        response.headers["HX-Location"] = "/"
+        response.status_code = 303
+        response.headers["Location"] = "/"
+        return response
     except Exception as err:
         return templates.TemplateResponse(
             request=request,
-            name="components/alert.html",
+            name="auth.html",
             context={
-                "type": "danger",
-                "message": err,
+                "title": "Login",
+                "error": err,
             },
         )
 

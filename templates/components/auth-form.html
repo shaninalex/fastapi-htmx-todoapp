@@ -1,4 +1,4 @@
-<form class="card mx-auto" hx-post="{% if register %}/register{% else %}/auth{% endif %}" hx-target="#auth-response"
+<form class="card mx-auto" method="POST" action="{% if register %}/register{% else %}/auth{% endif %}"
     style="max-width: 300px">
     <div class="card-body">
         <h5>{{title}}</h5>
@@ -8,7 +8,9 @@
         <div class="mb-3">
             <input type="password" placeholder="password" required name="password" class="form-control" />
         </div>
-        <div class="mb-3" id="auth-response"></div>
+        {% if not register %}
+        <div class="mb-3" id="auth-response">{{error}}</div>
+        {% endif %}
         <button type="submit" class="btn btn-outline-info">Submit</button>
     </div>
     {% if not register %}
