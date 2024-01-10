@@ -1,7 +1,7 @@
 from datetime import datetime
 import time
 from typing import Annotated, Any
-from fastapi import Depends, FastAPI, Request, Form, HTTPException
+from fastapi import Depends, FastAPI, Request, Form
 from fastapi.responses import Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
@@ -54,11 +54,17 @@ async def add_process_time_header(request: Request, call_next):
 templates = Jinja2Templates(directory="templates")
 
 
-@app.get("/", response_class=HTMLResponse, dependencies=[Depends(validate_user)])
-async def home(request: Request):
-    # Redirecting to auth page
-    # return RedirectResponse("/auth")
-    return templates.TemplateResponse(request=request, name="home.html")
+@app.get("/", response_class=HTMLResponse)
+async def home(request: Request,
+               account: Annotated[Any, Depends(validate_user)]):
+    tasks_query = select(task).where(task.c.user_id == account.id)
+    tasks = await database.fetch_all(tasks_query)
+    return templates.TemplateResponse(
+        request=request,
+        name="home.html",
+        context={
+            "tasks": tasks
+        })
 
 
 @app.get("/auth", response_class=HTMLResponse)
@@ -154,8 +160,10 @@ async def create_task(request: Request,
             name="chunks/task-card.html",
             status_code=201,
             context={
-                "id": inserted_row_id,
-                "name": taskname,
+                "task": {
+                    "id": inserted_row_id,
+                    "name": taskname,
+                }
             },
         )
     except Exception as err:
