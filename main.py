@@ -145,7 +145,7 @@ async def register_handler(
         )
 
 
-@app.post("/create-task")
+@app.post("/task")
 async def create_task(request: Request,
                       taskname: Annotated[str, Form()],
                       account: Annotated[Any, Depends(validate_user)]):
@@ -176,6 +176,11 @@ async def create_task(request: Request,
                 "message": err,
             },
         )
+
+
+@app.delete("/task/{id}")
+def delete_task(id: str):
+    return None
 
 
 @app.get("/logout")

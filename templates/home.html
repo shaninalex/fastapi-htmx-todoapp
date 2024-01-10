@@ -5,7 +5,7 @@
 {% block content %}
     {% include "components/navbar.html" %}
     <div class="container" hx-ext="response-targets">
-        <form hx-post="/create-task"
+        <form hx-post="/task"
               hx-swap="afterbegin"
               hx-target="#tasks-list"
               hx-target-400="#create_task_error"
