@@ -1,13 +1,17 @@
 <div class="card">
-    <form class="card-body">
-        <div class="mb-3">
-            <input class="form-control" type="text" name="name" value="{{ task.name }}" />
-        </div>
-        <div class="mb-3">
-            <textarea class="form-control" palceholder="Short task description" name="description">{% if
-                task.description %}{{ task.description }}{% endif
-                %}</textarea>
-        </div>
+    <div class="card-body">
+        <form>
+            <div class="mb-3">
+                <input class="form-control" type="text" name="name" value="{{ task.name }}" />
+            </div>
+            <div class="mb-3">
+                <textarea class="form-control" palceholder="Short task description" name="description">{% if
+                    task.description %}{{ task.description }}{% endif
+                    %}</textarea>
+            </div>
+
+            <button class="btn btn-sm btn-info" type="submit">Save</button>
+        </form>
 
         <div class="d-flex align-items-center justify-content-between">
             Subtasks:
@@ -20,6 +24,5 @@
             </button>
         </div>
 
-        <button class="btn btn-info" type="submit">Save</button>
-    </form>
+    </div>
 </div>

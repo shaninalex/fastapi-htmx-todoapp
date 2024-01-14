@@ -10,7 +10,7 @@ from fastapi.templating import Jinja2Templates
 from sqlalchemy import insert, select, delete
 from contextlib import asynccontextmanager
 
-from internal.db import metadata, database, engine, user, task
+from internal.db import metadata, database, engine, user, task, checkbox
 from internal.utils import (
     generate_auth_cookie,
     generate_password,
@@ -59,11 +59,24 @@ async def home(request: Request,
                account: Annotated[Any, Depends(validate_user)]):
     tasks_query = select(task).where(task.c.user_id == account.id)
     tasks = await database.fetch_all(tasks_query)
+    tasks_list = []
+    for t in tasks:
+        checkboxes = await database.fetch_all(select(checkbox).where(
+            checkbox.c.task_id == t.id
+        ))
+        tasks_list.append({
+            "id": t.id,
+            "name": t.name,
+            "description": t.description,
+            "completed": t.completed,
+            "checkboxes": checkboxes
+        })
+
     return templates.TemplateResponse(
         request=request,
         name="home.html",
         context={
-            "tasks": tasks,
+            "tasks": tasks_list,
             "account": account
         })
 
