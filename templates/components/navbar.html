@@ -1,0 +1,15 @@
+<nav class="navbar bg-body-tertiary mb-5">
+    <div class="container">
+        <a class="navbar-brand" href="#">TodoApp</a>
+        <div class="dropdown">
+            <button class="btn dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                <img src="{{ url_for('static', path='/random.png') }}" style="width: 2rem; height: 2rem"
+                    class="rounded-circle mr-2" />
+                {{ account.email }}
+            </button>
+            <ul class="dropdown-menu dropdown-menu-end">
+                <li><a class="dropdown-item" href="/logout">logout</a></li>
+            </ul>
+        </div>
+    </div>
+</nav>

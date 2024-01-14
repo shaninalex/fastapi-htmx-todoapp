@@ -1,6 +1,3 @@
-run:
-	@docker compose up -d --build
-
 start:
 	@uvicorn main:app --reload
 

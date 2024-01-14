@@ -1,0 +1,27 @@
+<div class="card">
+    <div class="card-body">
+        <form hx-patch="/task/{{ task.id }}" hx-target="#task-{{ task.id }}" hx-swap="outerHTML">
+            <div class="mb-3">
+                <input class="form-control" type="text" name="name" value="{{ task.name }}" />
+            </div>
+            <div class="mb-3">
+                <textarea class="form-control" palceholder="Short task description" name="description">{% if
+                    task.description %}{{ task.description }}{% endif
+                    %}</textarea>
+            </div>
+            <button class="btn btn-sm btn-info" type="submit">Save</button>
+        </form>
+
+        <div class="d-flex align-items-center justify-content-between">
+            Subtasks:
+            <button type="button" class="btn"><i class="fa fa-plus text-success"></i></button>
+        </div>
+        <div class="input-group mb-3">
+            <input type="text" class="form-control" placeholder="Subtask name" />
+            <button class="btn btn-outline-secondary" type="button" id="button-addon2">
+                <i class="fa fa-times text-danger"></i>
+            </button>
+        </div>
+
+    </div>
+</div>
