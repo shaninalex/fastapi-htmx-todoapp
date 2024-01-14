@@ -1,4 +1,4 @@
-<div class="form-check">
+<div class="form-check" hx-patch="/task/{{ task.id }}/checkbox/{{ c.id }}" hx-target="this" hx-swap="outerHTML">
     <input class="form-check-input" type="checkbox" {% if c.completed %} checked="checked" {% endif %}
         id="checkbox-{{task.id}}-{{c.id}}" name="checkbox-{{task.id}}-{{c.id}}" />
     <label class="form-check-label" for="checkbox-{{task.id}}-{{c.id}}">{{c.name}}</label>
