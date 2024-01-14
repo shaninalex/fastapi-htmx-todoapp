@@ -7,7 +7,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-from sqlalchemy import insert, select, delete
+from sqlalchemy import insert, select, delete, update
 from contextlib import asynccontextmanager
 
 from internal.db import metadata, database, engine, user, task, checkbox
@@ -203,10 +203,11 @@ async def delete_task(id: str,
     return None
 
 
+# get task form html
 @app.get("/task/{id}/edit")
-async def patch_task(id: str,
-                     request: Request,
-                     account: Annotated[Any, Depends(validate_user)]):
+async def get_task_form(id: str,
+                        request: Request,
+                        account: Annotated[Any, Depends(validate_user)]):
     query = select(task).where(task.c.id == id, task.c.user_id == account.id)
     task_item = await database.fetch_one(query)
     return templates.TemplateResponse(
@@ -216,6 +217,37 @@ async def patch_task(id: str,
         context={
             "task": task_item
         },
+    )
+
+
+@app.patch("/task/{id}")
+async def patch_task(id: str,
+                     name: Annotated[str, Form()],
+                     description: Annotated[str, Form()],
+                     request: Request,
+                     account: Annotated[Any, Depends(validate_user)]):
+    await database.fetch_one(
+        update(task).values({
+            "name": name,
+            "description": description
+        }).where(task.c.id == id)
+    )
+    query = select(task).where(task.c.id == id, task.c.user_id == account.id)
+    t = await database.fetch_one(query)
+    checkboxes = await database.fetch_all(select(checkbox).where(
+        checkbox.c.task_id == t.id
+    ))
+    return templates.TemplateResponse(
+        request=request,
+        name="chunks/task-card.html",
+        status_code=201,
+        context={"task": {
+            "id": t.id,
+            "name": t.name,
+            "description": t.description,
+            "completed": t.completed,
+            "checkboxes": checkboxes
+        }},
     )
 
 
