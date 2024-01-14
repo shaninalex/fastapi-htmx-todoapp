@@ -220,7 +220,46 @@ async def get_task_form(id: str,
     )
 
 
-@app.patch("/task/{id}")
+@app.patch("/task/{task_id}/checkbox/{checkbox_id}")
+async def patch_checkbox(
+    task_id: str,
+    checkbox_id: str,
+    request: Request,
+        account: Annotated[Any, Depends(validate_user)]):
+
+    check = await database.fetch_one(select(checkbox).where(
+        checkbox.c.task_id == task_id,
+        checkbox.c.id == checkbox_id,
+    ))
+
+    comp = not check.completed
+
+    await database.fetch_one(
+        update(checkbox).values({
+            "completed": comp,
+        }).where(
+            checkbox.c.task_id == task_id,
+            checkbox.c.id == checkbox_id,
+        ))
+
+    return templates.TemplateResponse(
+        request=request,
+        name="chunks/checkbox-item.html",
+        status_code=200,
+        context={
+            "task": {
+                "id": task_id,
+            },
+            "c": {
+                "id": check.id,
+                "name": check.name,
+                "completed": comp,
+            }
+        }
+    )
+
+
+@ app.patch("/task/{id}")
 async def patch_task(id: str,
                      name: Annotated[str, Form()],
                      description: Annotated[str, Form()],
@@ -240,7 +279,7 @@ async def patch_task(id: str,
     return templates.TemplateResponse(
         request=request,
         name="chunks/task-card.html",
-        status_code=201,
+        status_code=200,
         context={"task": {
             "id": t.id,
             "name": t.name,
